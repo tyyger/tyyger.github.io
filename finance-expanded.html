@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Vault — Financial Profiles</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080c10;--surface:#0e1420;--surface2:#141b28;
+  --border:#1e2a3a;--border2:#253040;--text:#e8edf5;
+  --muted:#5a6a80;--dim:#8a9ab0;
+  --green:#22d47c;--red:#f04a5e;--gold:#f5c842;--blue:#4a9eff;
+}
+html{scroll-behavior:smooth}
+body{font-family:'IBM Plex Mono',monospace;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(74,158,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(74,158,255,0.02) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+
+header{position:sticky;top:0;z-index:50;background:rgba(8,12,16,0.92);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);}
+.header-inner{max-width:1400px;margin:0 auto;padding:0 2rem;height:60px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text);display:flex;align-items:center;gap:0.6rem;}
+.logo-mark{width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,var(--blue),var(--green));display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:#fff;}
+.header-meta{font-size:0.72rem;color:var(--muted);letter-spacing:0.05em;display:flex;align-items:center;gap:1.5rem;}
+.live-dot{display:flex;align-items:center;gap:0.4rem;color:var(--green);}
+.live-dot::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+.container{max-width:1400px;margin:0 auto;padding:2.5rem 2rem;position:relative;z-index:1;}
+.page-title{font-family:'Syne',sans-serif;font-size:0.7rem;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:2.5rem;display:flex;align-items:center;gap:1rem;}
+.page-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+.profiles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(430px,1fr));gap:2rem;}
+
+.profile-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;animation:fadeUp 0.5s ease both;transition:border-color 0.2s;}
+.profile-card:hover{border-color:var(--border2);}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.profile-card:nth-child(1){animation-delay:.05s}.profile-card:nth-child(2){animation-delay:.1s}
+.profile-card:nth-child(3){animation-delay:.15s}.profile-card:nth-child(4){animation-delay:.2s}
+.profile-card:nth-child(5){animation-delay:.25s}.profile-card:nth-child(6){animation-delay:.3s}
+.profile-card:nth-child(7){animation-delay:.35s}
+
+/* HEAD */
+.profile-head{padding:1.5rem;border-bottom:1px solid var(--border);background:var(--surface2);}
+.profile-head-top{display:flex;align-items:flex-start;gap:1rem;margin-bottom:1rem;}
+.avatar{width:52px;height:52px;border-radius:12px;font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.profile-info{flex:1;}
+.profile-name{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;letter-spacing:0.02em;margin-bottom:0.2rem;}
+.profile-id{font-size:0.65rem;color:var(--muted);letter-spacing:0.06em;margin-bottom:0.35rem;}
+.profile-tags{display:flex;gap:0.4rem;flex-wrap:wrap;}
+.tag{font-size:0.58rem;letter-spacing:0.08em;text-transform:uppercase;font-weight:500;padding:0.2rem 0.5rem;border-radius:4px;border:1px solid var(--border2);color:var(--dim);}
+.tag.premium{border-color:#4a9eff44;color:var(--blue);}
+.tag.advisor{border-color:#f5c84244;color:var(--gold);}
+.tag.flagged{border-color:#f04a5e44;color:var(--red);}
+.tag.new{border-color:#22d47c44;color:var(--green);}
+.net-worth{text-align:right;flex-shrink:0;}
+.net-worth-label{font-size:0.62rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.2rem;}
+.net-worth-value{font-family:'Syne',sans-serif;font-weight:700;font-size:1.15rem;color:var(--gold);}
+.net-worth-change{font-size:0.65rem;margin-top:0.2rem;}
+.pos{color:var(--green)}.neg{color:var(--red)}
+
+.bio-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem 1.5rem;padding-top:0.75rem;border-top:1px solid var(--border);}
+.bio-label{font-size:0.6rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.1rem;}
+.bio-val{font-size:0.74rem;color:var(--text);}
+.credit-row{display:flex;align-items:center;gap:0.75rem;padding-top:0.6rem;grid-column:1/-1;}
+.credit-label{font-size:0.6rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;white-space:nowrap;}
+.credit-bar{flex:1;height:6px;border-radius:3px;background:var(--border);overflow:hidden;}
+.credit-fill{height:100%;border-radius:3px;}
+.credit-score{font-size:0.74rem;font-weight:500;white-space:nowrap;}
+
+/* SECTIONS */
+.card-section{padding:1rem 1.5rem;border-bottom:1px solid var(--border);}
+.card-section:last-child{border-bottom:none;}
+.section-label{font-size:0.62rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:0.85rem;display:flex;align-items:center;gap:0.5rem;}
+
+/* ACCOUNTS */
+.account-row{display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0;}
+.account-row+.account-row{border-top:1px solid var(--border);}
+.account-left{display:flex;align-items:center;gap:0.75rem;}
+.account-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:0.72rem;flex-shrink:0;}
+.account-name{font-size:0.77rem;font-weight:500;}
+.account-num{font-size:0.62rem;color:var(--muted);margin-top:1px;}
+.account-right{text-align:right;}
+.account-bal{font-family:'Syne',sans-serif;font-weight:600;font-size:0.87rem;}
+.account-change{font-size:0.62rem;margin-top:1px;}
+.account-apy{font-size:0.6rem;color:var(--muted);margin-top:1px;}
+
+/* STOCKS */
+.stock-row{display:flex;align-items:center;padding:0.48rem 0;gap:0.6rem;}
+.stock-row+.stock-row{border-top:1px solid var(--border);}
+.ticker{font-family:'Syne',sans-serif;font-weight:700;font-size:0.76rem;width:44px;flex-shrink:0;color:var(--blue);}
+.stock-mid{flex:1;}
+.stock-shares{font-size:0.65rem;color:var(--muted);}
+.stock-company{font-size:0.6rem;color:var(--muted);margin-top:1px;opacity:0.7;}
+.spark{width:54px;height:20px;flex-shrink:0;}
+.stock-right{text-align:right;min-width:68px;}
+.stock-chg{font-size:0.78rem;font-weight:500;}
+.stock-val{font-size:0.62rem;color:var(--dim);margin-top:1px;}
+.stock-price{font-size:0.6rem;color:var(--muted);margin-top:1px;}
+
+/* DEBTS */
+.debt-row{display:flex;align-items:center;justify-content:space-between;padding:0.48rem 0;}
+.debt-row+.debt-row{border-top:1px solid var(--border);}
+.debt-name{font-size:0.77rem;}
+.debt-sub{font-size:0.62rem;color:var(--muted);margin-top:1px;}
+.debt-right{text-align:right;}
+.debt-bal{font-size:0.84rem;font-weight:500;color:var(--red);}
+.debt-rate{font-size:0.62rem;color:var(--muted);margin-top:1px;}
+
+/* TRANSACTIONS */
+.txn-row{display:flex;align-items:center;justify-content:space-between;padding:0.44rem 0;}
+.txn-row+.txn-row{border-top:1px solid var(--border);}
+.txn-desc{font-size:0.74rem;}
+.txn-date{font-size:0.6rem;color:var(--muted);margin-top:1px;}
+.txn-amt{font-size:0.8rem;font-weight:500;}
+
+/* SUMMARY */
+.summary-bar{display:flex;gap:0.4rem;padding:0.9rem 1.5rem;background:var(--surface2);border-top:1px solid var(--border);flex-wrap:wrap;}
+.summary-chip{flex:1;min-width:64px;padding:0.42rem 0.55rem;border-radius:8px;border:1px solid var(--border);text-align:center;}
+.summary-chip-label{font-size:0.56rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.2rem;}
+.summary-chip-val{font-family:'Syne',sans-serif;font-weight:700;font-size:0.78rem;}
+
+footer{border-top:1px solid var(--border);padding:1.5rem 2rem;text-align:center;font-size:0.65rem;color:var(--muted);letter-spacing:0.06em;position:relative;z-index:1;}
+@media(max-width:500px){.profiles-grid{grid-template-columns:1fr;}.header-meta span:not(.live-dot){display:none;}.bio-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div class="logo"><div class="logo-mark">V</div>VAULT</div>
+    <div class="header-meta">
+      <span class="live-dot">LIVE</span>
+      <span>FEB 26, 2026</span>
+      <span>NYSE OPEN</span>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="page-title">Client Financial Profiles</div>
+  <div class="profiles-grid" id="profilesGrid"></div>
+</div>
+
+<footer>VAULT DEMO &mdash; ALL DATA IS ENTIRELY FICTIONAL &mdash; FOR DISPLAY PURPOSES ONLY</footer>
+
+<script>
+const profiles = [
+  {
+    name:"Marcus T. Holloway", id:"CLT-00412",
+    avatar:"MH", avatarBg:"linear-gradient(135deg,#4a9eff,#2256cc)",
+    netWorth:"$284,510", nwChange:"+$14,220 YTD", nwPos:true,
+    tags:["premium","advisor"],
+    bio:{age:"38",occupation:"Software Engineer",location:"Austin, TX",memberSince:"Jan 2019",income:"$185,000",risk:"Moderate-Aggressive"},
+    credit:{score:762,label:"Excellent"},
+    accounts:[
+      {icon:"⬡",iBg:"#0d2a4a",iCol:"#4a9eff",name:"Premier Checking",num:"••••  3821",bal:"$12,450.88",chg:"+$240 this month",apy:null,pos:true},
+      {icon:"◈",iBg:"#0d3a2a",iCol:"#22d47c",name:"High-Yield Savings",num:"••••  7703",bal:"$58,200.00",chg:"+$1,800 this month",apy:"APY 2.8%",pos:true},
+      {icon:"◈",iBg:"#3d300a",iCol:"#f5c842",name:"Roth IRA",num:"••••  4490",bal:"$31,400.00",chg:"+$3,100 YTD",apy:null,pos:true},
+    ],
+    stocks:[
+      {t:"NVDA",co:"NVIDIA Corp.",sh:"42 shares",p:"$875.20",v:"$36,758",c:"+4.2%",pos:true, sp:[60,65,72,68,80,85,90,88,95]},
+      {t:"AAPL",co:"Apple Inc.",sh:"115 shares",p:"$178.50",v:"$20,528",c:"+1.8%",pos:true, sp:[80,75,78,82,79,85,84,87,90]},
+      {t:"TSLA",co:"Tesla Inc.",sh:"30 shares",p:"$192.10",v:"$5,763",c:"-3.1%",pos:false,sp:[90,80,70,75,65,60,68,72,66]},
+      {t:"VOO", co:"Vanguard S&P",sh:"80 shares",p:"$455.00",v:"$36,400",c:"+0.9%",pos:true, sp:[50,55,58,60,62,65,64,68,70]},
+    ],
+    debts:[
+      {name:"Mortgage – 2412 Elm St.",sub:"30-yr fixed · $340k orig.",bal:"$298,400",rate:"3.25% APR"},
+      {name:"Auto Loan – 2022 Toyota",sub:"60-mo · $42k orig.",bal:"$18,200",rate:"4.9% APR"},
+    ],
+    txns:[
+      {desc:"Direct Deposit – Employer",date:"Feb 15, 2026",amt:"+$7,307",pos:true},
+      {desc:"Whole Foods Market",date:"Feb 18, 2026",amt:"-$148",pos:false},
+      {desc:"Netflix Subscription",date:"Feb 20, 2026",amt:"-$22",pos:false},
+      {desc:"Transfer to Savings",date:"Feb 21, 2026",amt:"-$1,500",pos:false},
+    ],
+    summary:{checking:"$12,451",savings:"$89,600",stocks:"$99,449",debt:"-$316,600"}
+  },
+  {
+    name:"Priya Nair-Okonkwo", id:"CLT-00839",
+    avatar:"PO", avatarBg:"linear-gradient(135deg,#f5c842,#e08800)",
+    netWorth:"$512,840", nwChange:"+$38,500 YTD", nwPos:true,
+    tags:["premium","advisor"],
+    bio:{age:"44",occupation:"Startup Founder / CEO",location:"San Francisco, CA",memberSince:"Mar 2017",income:"$420,000",risk:"Aggressive"},
+    credit:{score:810,label:"Exceptional"},
+    accounts:[
+      {icon:"⬡",iBg:"#0d2a4a",iCol:"#4a9eff",name:"Business Checking",num:"••••  1145",bal:"$34,900.00",chg:"+$8,200 this month",apy:null,pos:true},
+      {icon:"◈",iBg:"#0d3a2a",iCol:"#22d47c",name:"Emergency Fund",num:"••••  5592",bal:"$90,000.00",chg:"+$2,100 this month",apy:"APY 3.1%",pos:true},
+      {icon:"◈",iBg:"#3d300a",iCol:"#f5c842",name:"Travel Fund",num:"••••  8810",bal:"$18,400.00",chg:"+$1,200 this month",apy:"APY 2.4%",pos:true},
+      {icon:"◈",iBg:"#2a0d3a",iCol:"#c47eff",name:"SEP-IRA",num:"••••  3302",bal:"$112,000.00",chg:"+$18,000 YTD",apy:null,pos:true},
+    ],
+    stocks:[
+      {t:"MSFT",co:"Microsoft Corp.",sh:"200 shares",p:"$389.40",v:"$77,880",c:"+2.3%",pos:true, sp:[55,60,65,62,70,75,72,78,82]},
+      {t:"AMZN",co:"Amazon.com",sh:"90 shares",p:"$182.00",v:"$16,380",c:"+1.5%",pos:true, sp:[70,68,72,75,70,78,82,80,85]},
+      {t:"INTC",co:"Intel Corp.",sh:"500 shares",p:"$22.10",v:"$11,050",c:"-5.8%",pos:false,sp:[90,85,80,78,72,68,70,65,62]},
+      {t:"META",co:"Meta Platforms",sh:"60 shares",p:"$508.00",v:"$30,480",c:"+3.1%",pos:true, sp:[50,58,62,70,68,75,80,78,85]},
+      {t:"GOOG",co:"Alphabet Inc.",sh:"40 shares",p:"$172.00",v:"$6,880",c:"+0.7%",pos:true, sp:[60,62,65,63,68,70,69,72,74]},
+    ],
+    debts:[
+      {name:"Home Equity LOC",sub:"$250k limit · variable",bal:"$40,000",rate:"7.5% APR"},
+    ],
+    txns:[
+      {desc:"ACH Transfer – Business Revenue",date:"Feb 10, 2026",amt:"+$35,000",pos:true},
+      {desc:"QuickBooks Payroll",date:"Feb 15, 2026",amt:"-$18,400",pos:false},
+      {desc:"Delta Airlines",date:"Feb 17, 2026",amt:"-$1,240",pos:false},
+      {desc:"SEP-IRA Contribution",date:"Feb 20, 2026",amt:"-$6,000",pos:false},
+    ],
+    summary:{checking:"$255,300",savings:"$108,400",stocks:"$122,670",debt:"-$40,000"}
+  },
+  {
+    name:"Derek J. Callahan", id:"CLT-01277",
+    avatar:"DC", avatarBg:"linear-gradient(135deg,#f04a5e,#8b0020)",
+    netWorth:"$91,320", nwChange:"+$4,100 YTD", nwPos:true,
+    tags:["flagged"],
+    bio:{age:"29",occupation:"Freelance Photographer",location:"Nashville, TN",memberSince:"Jul 2022",income:"$62,000",risk:"Moderate"},
+    credit:{score:638,label:"Fair"},
+    accounts:[
+      {icon:"⬡",iBg:"#0d2a4a",iCol:"#4a9eff",name:"Standard Checking",num:"••••  9034",bal:"$3,210.44",chg:"-$880 this month",apy:null,pos:false},
+      {icon:"◈",iBg:"#0d3a2a",iCol:"#22d47c",name:"Savings Account",num:"••••  2281",bal:"$14,650.00",chg:"+$400 this month",apy:"APY 1.9%",pos:true},
+    ],
+    stocks:[
+      {t:"SPY", co:"SPDR S&P 500",sh:"55 shares",p:"$510.00",v:"$28,050",c:"+1.2%",pos:true, sp:[50,54,58,55,60,62,65,63,67]},
+      {t:"PLTR",co:"Palantir Tech.",sh:"300 shares",p:"$24.80",v:"$7,440",c:"+8.1%",pos:true, sp:[40,50,60,55,70,65,75,72,80]},
+      {t:"F",   co:"Ford Motor Co.",sh:"400 shares",p:"$11.20",v:"$4,480",c:"-4.4%",pos:false,sp:[70,65,60,62,58,55,50,52,48]},
+    ],
+    debts:[
+      {name:"Student Loan – Fed Direct",sub:"IBR Plan · $48k orig.",bal:"$34,200",rate:"5.05% APR"},
+      {name:"Credit Card – Chase Sapphire",sub:"Revolving · $8k limit",bal:"$5,820",rate:"22.4% APR"},
+    ],
+    txns:[
+      {desc:"Client Invoice – Wedding Shoot",date:"Feb 12, 2026",amt:"+$3,500",pos:true},
+      {desc:"Adobe Creative Cloud",date:"Feb 14, 2026",amt:"-$54",pos:false},
+      {desc:"Rent – Feb",date:"Feb 01, 2026",amt:"-$1,400",pos:false},
+      {desc:"Venmo – J. Morrow",date:"Feb 22, 2026",amt:"-$200",pos:false},
+    ],
+    summary:{checking:"$17,860",savings:"$14,650",stocks:"$39,970",debt:"-$40,020"}
+  },
+  {
+    name:"Yuki Tanaka-Reyes", id:"CLT-01540",
+    avatar:"YT", avatarBg:"linear-gradient(135deg,#22d47c,#0a7a44)",
+    netWorth:"$1,240,800", nwChange:"+$92,400 YTD", nwPos:true,
+    tags:["premium","advisor"],
+    bio:{age:"51",occupation:"Orthopedic Surgeon",location:"Chicago, IL",memberSince:"Sep 2014",income:"$680,000",risk:"Conservative-Moderate"},
+    credit:{score:835,label:"Exceptional"},
+    accounts:[
+      {icon:"⬡",iBg:"#0d2a4a",iCol:"#4a9eff",name:"Platinum Checking",num:"••••  0012",bal:"$48,200.00",chg:"+$6,400 this month",apy:null,pos:true},
+      {icon:"◈",iBg:"#0d3a2a",iCol:"#22d47c",name:"Money Market Savings",num:"••••  6631",bal:"$180,000.00",chg:"+$4,200 this month",apy:"APY 4.2%",pos:true},
+      {icon:"◈",iBg:"#3d300a",iCol:"#f5c842",name:"403(b) Retirement",num:"••••  9910",bal:"$520,000.00",chg:"+$44,000 YTD",apy:null,pos:true},
+    ],
+    stocks:[
+      {t:"JNJ",  co:"Johnson & Johnson",sh:"350 shares",p:"$152.00",v:"$53,200",c:"+0.4%",pos:true, sp:[60,62,61,63,65,64,66,68,67]},
+      {t:"UNH",  co:"UnitedHealth Grp",sh:"120 shares",p:"$520.00",v:"$62,400",c:"+1.1%",pos:true, sp:[55,58,60,62,65,63,67,70,72]},
+      {t:"BRK.B",co:"Berkshire Hath.",sh:"200 shares",p:"$408.00",v:"$81,600",c:"+0.6%",pos:true, sp:[50,53,56,55,58,60,62,65,64]},
+      {t:"VTI",  co:"Vanguard Total Mkt",sh:"400 shares",p:"$240.00",v:"$96,000",c:"+0.8%",pos:true, sp:[48,52,55,58,60,62,65,64,68]},
+      {t:"COST", co:"Costco Wholesale",sh:"50 shares",p:"$890.00",v:"$44,500",c:"+1.7%",pos:true, sp:[60,65,68,72,70,75,78,80,85]},
+    ],
+    debts:[
+      {name:"Mortgage – 4801 Lakeview Dr.",sub:"15-yr fixed · $900k orig.",bal:"$610,000",rate:"2.875% APR"},
+    ],
+    txns:[
+      {desc:"Northwestern Memorial – Payroll",date:"Feb 15, 2026",amt:"+$26,153",pos:true},
+      {desc:"Vanguard Auto-Invest",date:"Feb 16, 2026",amt:"-$5,000",pos:false},
+      {desc:"Marriott Bonvoy – Cancun",date:"Feb 18, 2026",amt:"-$3,200",pos:false},
+      {desc:"Whole Foods / Trader Joe's",date:"Feb 19, 2026",amt:"-$380",pos:false},
+    ],
+    summary:{checking:"$228,200",savings:"$180,000",stocks:"$337,700",debt:"-$610,000"}
+  },
+  {
+    name:"Bernard A. Kowalski", id:"CLT-00115",
+    avatar:"BK", avatarBg:"linear-gradient(135deg,#c47eff,#6a00cc)",
+    netWorth:"$3,820,000", nwChange:"+$210,000 YTD", nwPos:true,
+    tags:["premium","advisor"],
+    bio:{age:"67",occupation:"Retired CFO",location:"Scottsdale, AZ",memberSince:"Jan 2010",income:"$142,000 (pension + SS)",risk:"Conservative"},
+    credit:{score:820,label:"Exceptional"},
+    accounts:[
+      {icon:"⬡",iBg:"#0d2a4a",iCol:"#4a9eff",name:"Wealth Checking",num:"••••  0801",bal:"$92,400.00",chg:"+$8,100 this month",apy:null,pos:true},
+      {icon:"◈",iBg:"#0d3a2a",iCol:"#22d47c",name:"High-Yield Savings",num:"••••  3310",bal:"$250,000.00",chg:"+$3,100 this month",apy:"APY 4.5%",pos:true},
+      {icon:"◈",iBg:"#3d300a",iCol:"#f5c842",name:"Traditional IRA",num:"••••  7721",bal:"$880,000.00",chg:"+$62,000 YTD",apy:null,pos:true},
+      {icon:"◈",iBg:"#2a0d3a",iCol:"#c47eff",name:"Brokerage Account",num:"••••  4480",bal:"$1,400,000.00",chg:"+$110,000 YTD",apy:null,pos:true},
+    ],
+    stocks:[
+      {t:"T",    co:"AT&T Inc.",sh:"2,000 shares",p:"$17.80",v:"$35,600",c:"-0.4%",pos:false,sp:[55,53,50,52,48,50,52,49,51]},
+      {t:"VYM",  co:"Vanguard HY Div.",sh:"1,500 shares",p:"$118.00",v:"$177,000",c:"+0.5%",pos:true, sp:[60,62,61,63,64,65,64,66,68]},
+      {t:"SCHD", co:"Schwab US Div.",sh:"2,000 shares",p:"$82.00",v:"$164,000",c:"+0.3%",pos:true, sp:[58,59,60,61,62,61,63,64,65]},
+      {t:"MCD",  co:"McDonald's Corp.",sh:"300 shares",p:"$285.00",v:"$85,500",c:"+0.8%",pos:true, sp:[62,64,66,65,68,70,69,72,74]},
+      {t:"PG",   co:"Procter & Gamble",sh:"600 shares",p:"$162.00",v:"$97,200",c:"+0.2%",pos:true, sp:[60,61,62,61,63,64,63,65,66]},
+    ],
+    debts:[],
+    txns:[
+      {desc:"Social Security Deposit",date:"Feb 03, 2026",amt:"+$3,822",pos:true},
+      {desc:"Pension – Raytheon Corp.",date:"Feb 01, 2026",amt:"+$8,400",pos:true},
+      {desc:"RMD Distribution – IRA",date:"Feb 10, 2026",amt:"+$6,200",pos:true},
+      {desc:"Property Tax – Q1 2026",date:"Feb 14, 2026",amt:"-$4,100",pos:false},
+    ],
+    summary:{checking:"$342,400",savings:"$250,000",stocks:"$559,300",debt:"$0"}
+  },
+  {
+    name:"Aaliyah J. Washington", id:"CLT-02018",
+    avatar:"AW", avatarBg:"linear-gradient(135deg,#ff8c42,#b84400)",
+    netWorth:"$48,200", nwChange:"+$6,800 YTD", nwPos:true,
+    tags:["new"],
+    bio:{age:"24",occupation:"UX Designer",location:"Atlanta, GA",memberSince:"Oct 2025",income:"$74,000",risk:"Moderate"},
+    credit:{score:704,label:"Good"},
+    accounts:[
+      {icon:"⬡",iBg:"#0d2a4a",iCol:"#4a9eff",name:"Essential Checking",num:"••••  5512",bal:"$4,820.00",chg:"+$1,100 this month",apy:null,pos:true},
+      {icon:"◈",iBg:"#0d3a2a",iCol:"#22d47c",name:"Emergency Savings",num:"••••  8834",bal:"$9,400.00",chg:"+$500 this month",apy:"APY 2.1%",pos:true},
+      {icon:"◈",iBg:"#3d300a",iCol:"#f5c842",name:"Roth IRA",num:"••••  1102",bal:"$7,100.00",chg:"+$1,400 YTD",apy:null,pos:true},
+    ],
+    stocks:[
+      {t:"VTI", co:"Vanguard Total Mkt",sh:"60 shares",p:"$240.00",v:"$14,400",c:"+0.8%",pos:true, sp:[50,52,55,54,57,58,60,62,64]},
+      {t:"QQQ", co:"Invesco QQQ",sh:"18 shares",p:"$480.00",v:"$8,640",c:"+1.4%",pos:true, sp:[55,58,62,60,66,70,68,72,75]},
+      {t:"COIN",co:"Coinbase Global",sh:"25 shares",p:"$168.00",v:"$4,200",c:"-7.2%",pos:false,sp:[80,70,65,72,60,55,62,58,52]},
+    ],
+    debts:[
+      {name:"Student Loan – Private",sub:"10-yr · $28k orig.",bal:"$22,100",rate:"6.8% APR"},
+    ],
+    txns:[
+      {desc:"Direct Deposit – Figma Inc.",date:"Feb 15, 2026",amt:"+$2,846",pos:true},
+      {desc:"Spotify + Apple Music",date:"Feb 16, 2026",amt:"-$26",pos:false},
+      {desc:"Roth IRA Contribution",date:"Feb 17, 2026",amt:"-$500",pos:false},
+      {desc:"Trader Joe's",date:"Feb 22, 2026",amt:"-$95",pos:false},
+    ],
+    summary:{checking:"$14,220",savings:"$9,400",stocks:"$27,240",debt:"-$22,100"}
+  },
+  {
+    name:"Raymond O. Estrada", id:"CLT-00703",
+    avatar:"RE", avatarBg:"linear-gradient(135deg,#40c8e0,#005a72)",
+    netWorth:"$198,600", nwChange:"-$8,200 YTD", nwPos:false,
+    tags:["flagged"],
+    bio:{age:"55",occupation:"Restaurant Owner",location:"Miami, FL",memberSince:"Jun 2016",income:"$210,000",risk:"Moderate-Aggressive"},
+    credit:{score:671,label:"Good"},
+    accounts:[
+      {icon:"⬡",iBg:"#0d2a4a",iCol:"#4a9eff",name:"Business Checking",num:"••••  4490",bal:"$28,500.00",chg:"-$4,200 this month",apy:null,pos:false},
+      {icon:"⬡",iBg:"#1a2a0d",iCol:"#88dd44",name:"Payroll Checking",num:"••••  6631",bal:"$14,100.00",chg:"+$2,200 this month",apy:null,pos:true},
+      {icon:"◈",iBg:"#0d3a2a",iCol:"#22d47c",name:"Business Savings",num:"••••  1199",bal:"$32,000.00",chg:"-$8,000 this month",apy:"APY 2.0%",pos:false},
+    ],
+    stocks:[
+      {t:"DRI", co:"Darden Restaurants",sh:"80 shares",p:"$162.00",v:"$12,960",c:"+2.1%",pos:true, sp:[55,60,58,62,65,64,68,70,72]},
+      {t:"CMG", co:"Chipotle Mexican",sh:"20 shares",p:"$58.00",v:"$1,160",c:"+0.9%",pos:true, sp:[50,52,54,53,56,58,57,60,62]},
+      {t:"SBUX",co:"Starbucks Corp.",sh:"200 shares",p:"$88.00",v:"$17,600",c:"-1.8%",pos:false,sp:[75,72,70,68,65,62,60,58,56]},
+      {t:"BYND",co:"Beyond Meat Inc.",sh:"500 shares",p:"$6.40",v:"$3,200",c:"-12.5%",pos:false,sp:[60,52,45,48,38,35,30,28,25]},
+    ],
+    debts:[
+      {name:"SBA Loan – Estrada's Kitchen",sub:"10-yr · $400k orig.",bal:"$248,000",rate:"6.5% APR"},
+      {name:"Equipment Lease – Commercial",sub:"5-yr · $80k orig.",bal:"$44,000",rate:"8.2% APR"},
+      {name:"Business Line of Credit",sub:"$100k limit · revolving",bal:"$62,000",rate:"9.1% APR"},
+    ],
+    txns:[
+      {desc:"POS Revenue – Estrada's Kitchen",date:"Feb 17, 2026",amt:"+$42,100",pos:true},
+      {desc:"Sysco Food Services",date:"Feb 14, 2026",amt:"-$18,300",pos:false},
+      {desc:"SBA Loan Payment",date:"Feb 01, 2026",amt:"-$3,880",pos:false},
+      {desc:"Payroll – 14 staff",date:"Feb 15, 2026",amt:"-$28,400",pos:false},
+    ],
+    summary:{checking:"$42,600",savings:"$32,000",stocks:"$34,920",debt:"-$354,000"}
+  },
+];
+
+function creditColor(s){
+  if(s>=800)return"#22d47c";if(s>=740)return"#a8e063";
+  if(s>=670)return"#f5c842";if(s>=580)return"#ff8c42";
+  return"#f04a5e";
+}
+function sparkPath(data,w,h){
+  const mn=Math.min(...data),mx=Math.max(...data),r=mx-mn||1;
+  return data.map((v,i)=>`${(i/(data.length-1))*w},${h-((v-mn)/r)*h}`).join(' ');
+}
+
+function render(p){
+  const tags=p.tags.map(t=>`<span class="tag ${t}">${t.toUpperCase()}</span>`).join('');
+  const bioRows=[
+    ["Age",p.bio.age],["Occupation",p.bio.occupation],
+    ["Location",p.bio.location],["Member Since",p.bio.memberSince],
+    ["Annual Income",p.bio.income],["Risk Profile",p.bio.risk],
+  ].map(([l,v])=>`<div class="bio-item"><div class="bio-label">${l}</div><div class="bio-val">${v}</div></div>`).join('');
+
+  const pct=((p.credit.score-300)/550)*100;
+  const cc=creditColor(p.credit.score);
+
+  const accts=p.accounts.map(a=>`
+    <div class="account-row">
+      <div class="account-left">
+        <div class="account-icon" style="background:${a.iBg};color:${a.iCol}">${a.icon}</div>
+        <div><div class="account-name">${a.name}</div><div class="account-num">${a.num}</div></div>
+      </div>
+      <div class="account-right">
+        <div class="account-bal">${a.bal}</div>
+        <div class="account-change ${a.pos?'pos':'neg'}">${a.chg}</div>
+        ${a.apy?`<div class="account-apy">${a.apy}</div>`:''}
+      </div>
+    </div>`).join('');
+
+  const stocks=p.stocks.map(s=>{
+    const pts=sparkPath(s.sp,54,18);
+    const sc=s.pos?'#22d47c':'#f04a5e';
+    return`<div class="stock-row">
+      <div class="ticker">${s.t}</div>
+      <div class="stock-mid"><div class="stock-shares">${s.sh}</div><div class="stock-company">${s.co}</div></div>
+      <svg class="spark" viewBox="0 0 54 18" preserveAspectRatio="none">
+        <polyline points="${pts}" fill="none" stroke="${sc}" stroke-width="1.5" stroke-linejoin="round"/>
+      </svg>
+      <div class="stock-right">
+        <div class="stock-chg ${s.pos?'pos':'neg'}">${s.c}</div>
+        <div class="stock-val">${s.v}</div>
+        <div class="stock-price">${s.p}/sh</div>
+      </div>
+    </div>`;}).join('');
+
+  const debts=p.debts.length===0
+    ?`<div style="font-size:0.72rem;color:var(--muted);padding:0.3rem 0">No outstanding debts ✓</div>`
+    :p.debts.map(d=>`
+    <div class="debt-row">
+      <div><div class="debt-name">${d.name}</div><div class="debt-sub">${d.sub}</div></div>
+      <div class="debt-right"><div class="debt-bal">${d.bal}</div><div class="debt-rate">${d.rate}</div></div>
+    </div>`).join('');
+
+  const txns=p.txns.map(t=>`
+    <div class="txn-row">
+      <div><div class="txn-desc">${t.desc}</div><div class="txn-date">${t.date}</div></div>
+      <div class="txn-amt ${t.pos?'pos':'neg'}">${t.amt}</div>
+    </div>`).join('');
+
+  const dc=p.summary.debt==="$0"?"var(--green)":"var(--red)";
+
+  return`<div class="profile-card">
+    <div class="profile-head">
+      <div class="profile-head-top">
+        <div class="avatar" style="background:${p.avatarBg}">${p.avatar}</div>
+        <div class="profile-info">
+          <div class="profile-name">${p.name}</div>
+          <div class="profile-id">ID: ${p.id}</div>
+          <div class="profile-tags">${tags}</div>
+        </div>
+        <div class="net-worth">
+          <div class="net-worth-label">Net Worth</div>
+          <div class="net-worth-value">${p.netWorth}</div>
+          <div class="net-worth-change ${p.nwPos?'pos':'neg'}">${p.nwChange}</div>
+        </div>
+      </div>
+      <div class="bio-grid">
+        ${bioRows}
+        <div class="credit-row">
+          <div class="credit-label">Credit</div>
+          <div class="credit-bar"><div class="credit-fill" style="width:${pct}%;background:${cc}"></div></div>
+          <div class="credit-score" style="color:${cc}">${p.credit.score} · ${p.credit.label}</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-section">
+      <div class="section-label">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+        Bank Accounts
+      </div>${accts}
+    </div>
+    <div class="card-section">
+      <div class="section-label">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        Stock Portfolio
+      </div>${stocks}
+    </div>
+    <div class="card-section">
+      <div class="section-label">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Debts & Loans
+      </div>${debts}
+    </div>
+    <div class="card-section">
+      <div class="section-label">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Recent Transactions
+      </div>${txns}
+    </div>
+    <div class="summary-bar">
+      <div class="summary-chip"><div class="summary-chip-label">Checking</div><div class="summary-chip-val" style="color:var(--blue)">${p.summary.checking}</div></div>
+      <div class="summary-chip"><div class="summary-chip-label">Savings</div><div class="summary-chip-val" style="color:var(--green)">${p.summary.savings}</div></div>
+      <div class="summary-chip"><div class="summary-chip-label">Stocks</div><div class="summary-chip-val" style="color:var(--gold)">${p.summary.stocks}</div></div>
+      <div class="summary-chip"><div class="summary-chip-label">Debt</div><div class="summary-chip-val" style="color:${dc}">${p.summary.debt}</div></div>
+    </div>
+  </div>`;
+}
+
+document.getElementById('profilesGrid').innerHTML=profiles.map(render).join('');
+</script>
+</body>
+</html>
