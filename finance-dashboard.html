@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Vault — Financial Profiles</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#080c10;
+  --surface:#0e1420;
+  --surface2:#141b28;
+  --border:#1e2a3a;
+  --border2:#253040;
+  --text:#e8edf5;
+  --muted:#5a6a80;
+  --dim:#8a9ab0;
+  --green:#22d47c;
+  --green-dim:#0d4a2a;
+  --red:#f04a5e;
+  --red-dim:#4a0d15;
+  --gold:#f5c842;
+  --gold-dim:#3d300a;
+  --blue:#4a9eff;
+  --blue-dim:#0d2a4a;
+}
+
+html{scroll-behavior:smooth}
+
+body{
+  font-family:'IBM Plex Mono',monospace;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* grid noise texture */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(74,158,255,0.02) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(74,158,255,0.02) 1px,transparent 1px);
+  background-size:40px 40px;
+  pointer-events:none;z-index:0;
+}
+
+/* ── HEADER ── */
+header{
+  position:sticky;top:0;z-index:50;
+  background:rgba(8,12,16,0.92);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(12px);
+}
+.header-inner{
+  max-width:1280px;margin:0 auto;
+  padding:0 2rem;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.logo{
+  font-family:'Syne',sans-serif;
+  font-weight:800;font-size:1.2rem;
+  letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--text);display:flex;align-items:center;gap:0.6rem;
+}
+.logo-mark{
+  width:28px;height:28px;border-radius:6px;
+  background:linear-gradient(135deg,var(--blue),var(--green));
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.7rem;font-weight:700;color:#fff;
+}
+.header-meta{
+  font-size:0.72rem;color:var(--muted);letter-spacing:0.05em;
+  display:flex;align-items:center;gap:1.5rem;
+}
+.live-dot{
+  display:flex;align-items:center;gap:0.4rem;color:var(--green);
+}
+.live-dot::before{
+  content:'';width:6px;height:6px;border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 8px var(--green);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+/* ── LAYOUT ── */
+.container{max-width:1280px;margin:0 auto;padding:2.5rem 2rem;position:relative;z-index:1;}
+
+.page-title{
+  font-family:'Syne',sans-serif;
+  font-size:0.7rem;font-weight:600;
+  letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:2.5rem;
+  display:flex;align-items:center;gap:1rem;
+}
+.page-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* ── PROFILE GRID ── */
+.profiles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:2rem;}
+
+/* ── PROFILE CARD ── */
+.profile-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+  animation:fadeUp 0.5s ease both;
+}
+.profile-card:nth-child(2){animation-delay:0.1s}
+.profile-card:nth-child(3){animation-delay:0.2s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+.profile-card:hover{border-color:var(--border2);}
+
+/* Profile Header */
+.profile-head{
+  padding:1.5rem;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:1rem;
+  background:var(--surface2);
+}
+.avatar{
+  width:48px;height:48px;border-radius:12px;
+  font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.profile-info{flex:1;}
+.profile-name{
+  font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;
+  letter-spacing:0.02em;margin-bottom:0.2rem;
+}
+.profile-id{font-size:0.68rem;color:var(--muted);letter-spacing:0.06em;}
+.net-worth{text-align:right;}
+.net-worth-label{font-size:0.65rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.2rem;}
+.net-worth-value{font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;color:var(--gold);}
+
+/* Section */
+.card-section{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);}
+.card-section:last-child{border-bottom:none;}
+.section-label{
+  font-size:0.65rem;letter-spacing:0.14em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:1rem;
+  display:flex;align-items:center;gap:0.5rem;
+}
+.section-label svg{opacity:0.5;}
+
+/* Account Row */
+.account-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0.6rem 0;
+}
+.account-row+.account-row{border-top:1px solid var(--border);}
+.account-left{display:flex;align-items:center;gap:0.75rem;}
+.account-icon{
+  width:32px;height:32px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;font-size:0.75rem;
+  flex-shrink:0;
+}
+.account-name{font-size:0.8rem;font-weight:500;color:var(--text);}
+.account-num{font-size:0.65rem;color:var(--muted);margin-top:1px;}
+.account-bal{
+  font-family:'Syne',sans-serif;font-weight:600;font-size:0.9rem;text-align:right;
+}
+.account-change{font-size:0.65rem;margin-top:1px;text-align:right;}
+.pos{color:var(--green);}
+.neg{color:var(--red);}
+
+/* Stock Row */
+.stock-row{
+  display:flex;align-items:center;
+  padding:0.55rem 0;gap:0.75rem;
+}
+.stock-row+.stock-row{border-top:1px solid var(--border);}
+.ticker{
+  font-family:'Syne',sans-serif;font-weight:700;font-size:0.78rem;
+  width:48px;flex-shrink:0;color:var(--blue);
+}
+.stock-shares{font-size:0.68rem;color:var(--muted);flex:1;}
+.stock-right{text-align:right;}
+.stock-price{font-size:0.82rem;font-weight:500;}
+.stock-val{font-size:0.65rem;color:var(--dim);margin-top:1px;}
+
+/* Sparkline */
+.spark{
+  width:56px;height:24px;flex-shrink:0;
+}
+
+/* Summary bar */
+.summary-bar{
+  display:flex;gap:0.5rem;padding:1rem 1.5rem;
+  background:var(--surface2);
+  border-top:1px solid var(--border);
+}
+.summary-chip{
+  flex:1;padding:0.5rem 0.75rem;
+  border-radius:8px;border:1px solid var(--border);
+  text-align:center;
+}
+.summary-chip-label{font-size:0.6rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.25rem;}
+.summary-chip-val{font-family:'Syne',sans-serif;font-weight:700;font-size:0.85rem;}
+
+/* ── FOOTER ── */
+footer{
+  border-top:1px solid var(--border);
+  padding:1.5rem 2rem;
+  text-align:center;
+  font-size:0.68rem;color:var(--muted);
+  letter-spacing:0.06em;
+  position:relative;z-index:1;
+}
+
+@media(max-width:500px){
+  .profiles-grid{grid-template-columns:1fr;}
+  .header-meta span:not(.live-dot){display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════ HEADER ══════ -->
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-mark">V</div>
+      VAULT
+    </div>
+    <div class="header-meta">
+      <span class="live-dot">LIVE</span>
+      <span>FEB 25, 2026</span>
+      <span>NYSE OPEN</span>
+    </div>
+  </div>
+</header>
+
+<!-- ══════ MAIN ══════ -->
+<div class="container">
+  <div class="page-title">Client Financial Profiles</div>
+
+  <div class="profiles-grid" id="profilesGrid">
+    <!-- Profiles injected by JS -->
+  </div>
+</div>
+
+<footer>VAULT DEMO &mdash; ALL DATA IS FICTIONAL &mdash; FOR DISPLAY PURPOSES ONLY</footer>
+
+<script>
+const profiles = [
+  {
+    name: "Marcus T. Holloway",
+    id: "CLT-00412",
+    avatarInitials: "MH",
+    avatarColor: "linear-gradient(135deg,#4a9eff,#2256cc)",
+    netWorth: "$284,510",
+    accounts: [
+      { type: "checking", icon: "⬡", iconBg: "#0d2a4a", iconColor: "#4a9eff", name: "Premier Checking", num: "••••  3821", balance: "$12,450.88", change: "+$240 this month", pos: true },
+      { type: "savings", icon: "◈", iconBg: "#0d3a2a", iconColor: "#22d47c", name: "High-Yield Savings", num: "••••  7703", balance: "$58,200.00", change: "+2.8% APY", pos: true },
+    ],
+    stocks: [
+      { ticker: "NVDA", shares: "42 shares", price: "$875.20", val: "$36,758", spark: [60,65,72,68,80,85,90,88,95], pos: true, chg: "+4.2%" },
+      { ticker: "AAPL", shares: "115 shares", price: "$178.50", val: "$20,528", spark: [80,75,78,82,79,85,84,87,90], pos: true, chg: "+1.8%" },
+      { ticker: "TSLA", shares: "30 shares", price: "$192.10", val: "$5,763", spark: [90,80,70,75,65,60,68,72,66], pos: false, chg: "-3.1%" },
+      { ticker: "VOO", shares: "80 shares", price: "$455.00", val: "$36,400", spark: [50,55,58,60,62,65,64,68,70], pos: true, chg: "+0.9%" },
+    ],
+    summary: { checking: "$12,451", savings: "$58,200", stocks: "$99,449" }
+  },
+  {
+    name: "Priya Nair-Okonkwo",
+    id: "CLT-00839",
+    avatarInitials: "PO",
+    avatarColor: "linear-gradient(135deg,#f5c842,#e08800)",
+    netWorth: "$512,840",
+    accounts: [
+      { type: "checking", icon: "⬡", iconBg: "#0d2a4a", iconColor: "#4a9eff", name: "Business Checking", num: "••••  1145", balance: "$34,900.00", change: "+$8,200 this month", pos: true },
+      { type: "savings", icon: "◈", iconBg: "#0d3a2a", iconColor: "#22d47c", name: "Emergency Fund", num: "••••  5592", balance: "$90,000.00", change: "+3.1% APY", pos: true },
+      { type: "savings", icon: "◈", iconBg: "#3d300a", iconColor: "#f5c842", name: "Travel Fund", num: "••••  8810", balance: "$18,400.00", change: "+$1,200 this month", pos: true },
+    ],
+    stocks: [
+      { ticker: "MSFT", shares: "200 shares", price: "$389.40", val: "$77,880", spark: [55,60,65,62,70,75,72,78,82], pos: true, chg: "+2.3%" },
+      { ticker: "AMZN", shares: "90 shares", price: "$182.00", val: "$16,380", spark: [70,68,72,75,70,78,82,80,85], pos: true, chg: "+1.5%" },
+      { ticker: "INTC", shares: "500 shares", price: "$22.10", val: "$11,050", spark: [90,85,80,78,72,68,70,65,62], pos: false, chg: "-5.8%" },
+    ],
+    summary: { checking: "$34,900", savings: "$108,400", stocks: "$105,310" }
+  },
+  {
+    name: "Derek J. Callahan",
+    id: "CLT-01277",
+    avatarInitials: "DC",
+    avatarColor: "linear-gradient(135deg,#f04a5e,#8b0020)",
+    netWorth: "$91,320",
+    accounts: [
+      { type: "checking", icon: "⬡", iconBg: "#0d2a4a", iconColor: "#4a9eff", name: "Standard Checking", num: "••••  9034", balance: "$3,210.44", change: "-$880 this month", pos: false },
+      { type: "savings", icon: "◈", iconBg: "#0d3a2a", iconColor: "#22d47c", name: "Savings Account", num: "••••  2281", balance: "$14,650.00", change: "+1.9% APY", pos: true },
+    ],
+    stocks: [
+      { ticker: "SPY",  shares: "55 shares", price: "$510.00", val: "$28,050", spark: [50,54,58,55,60,62,65,63,67], pos: true, chg: "+1.2%" },
+      { ticker: "PLTR", shares: "300 shares", price: "$24.80", val: "$7,440", spark: [40,50,60,55,70,65,75,72,80], pos: true, chg: "+8.1%" },
+      { ticker: "F",    shares: "400 shares", price: "$11.20", val: "$4,480", spark: [70,65,60,62,58,55,50,52,48], pos: false, chg: "-4.4%" },
+    ],
+    summary: { checking: "$3,210", savings: "$14,650", stocks: "$39,970" }
+  }
+];
+
+function sparkPath(data, w, h) {
+  const min = Math.min(...data), max = Math.max(...data);
+  const range = max - min || 1;
+  const pts = data.map((v, i) => {
+    const x = (i / (data.length - 1)) * w;
+    const y = h - ((v - min) / range) * h;
+    return `${x},${y}`;
+  });
+  return pts.join(' ');
+}
+
+function renderProfile(p) {
+  const acctHtml = p.accounts.map(a => `
+    <div class="account-row">
+      <div class="account-left">
+        <div class="account-icon" style="background:${a.iconBg};color:${a.iconColor}">${a.icon}</div>
+        <div>
+          <div class="account-name">${a.name}</div>
+          <div class="account-num">${a.num}</div>
+        </div>
+      </div>
+      <div>
+        <div class="account-bal">${a.balance}</div>
+        <div class="account-change ${a.pos ? 'pos' : 'neg'}">${a.change}</div>
+      </div>
+    </div>`).join('');
+
+  const stockHtml = p.stocks.map(s => {
+    const pts = sparkPath(s.spark, 56, 22);
+    const color = s.pos ? '#22d47c' : '#f04a5e';
+    return `
+    <div class="stock-row">
+      <div class="ticker">${s.ticker}</div>
+      <div class="stock-shares">${s.shares}</div>
+      <svg class="spark" viewBox="0 0 56 22" preserveAspectRatio="none">
+        <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round"/>
+      </svg>
+      <div class="stock-right">
+        <div class="stock-price ${s.pos ? 'pos' : 'neg'}">${s.chg}</div>
+        <div class="stock-val">${s.val}</div>
+      </div>
+    </div>`}).join('');
+
+  return `
+  <div class="profile-card">
+    <div class="profile-head">
+      <div class="avatar" style="background:${p.avatarColor}">${p.avatarInitials}</div>
+      <div class="profile-info">
+        <div class="profile-name">${p.name}</div>
+        <div class="profile-id">ID: ${p.id}</div>
+      </div>
+      <div class="net-worth">
+        <div class="net-worth-label">Net Worth</div>
+        <div class="net-worth-value">${p.netWorth}</div>
+      </div>
+    </div>
+
+    <div class="card-section">
+      <div class="section-label">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+        Bank Accounts
+      </div>
+      ${acctHtml}
+    </div>
+
+    <div class="card-section">
+      <div class="section-label">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        Stock Portfolio
+      </div>
+      ${stockHtml}
+    </div>
+
+    <div class="summary-bar">
+      <div class="summary-chip">
+        <div class="summary-chip-label">Checking</div>
+        <div class="summary-chip-val" style="color:var(--blue)">${p.summary.checking}</div>
+      </div>
+      <div class="summary-chip">
+        <div class="summary-chip-label">Savings</div>
+        <div class="summary-chip-val" style="color:var(--green)">${p.summary.savings}</div>
+      </div>
+      <div class="summary-chip">
+        <div class="summary-chip-label">Stocks</div>
+        <div class="summary-chip-val" style="color:var(--gold)">${p.summary.stocks}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+document.getElementById('profilesGrid').innerHTML = profiles.map(renderProfile).join('');
+</script>
+</body>
+</html>
