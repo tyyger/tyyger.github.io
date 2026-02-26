@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Vault — Marcus T. Holloway</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080c10;
+  --surface:#0e1420;
+  --surface2:#141b28;
+  --surface3:#0b1018;
+  --border:#1e2a3a;
+  --border2:#253040;
+  --text:#e8edf5;
+  --muted:#5a6a80;
+  --dim:#8a9ab0;
+  --green:#22d47c;
+  --red:#f04a5e;
+  --gold:#f5c842;
+  --blue:#4a9eff;
+  --purple:#c47eff;
+  --orange:#ff8c42;
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:'IBM Plex Mono',monospace;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(74,158,255,0.018) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(74,158,255,0.018) 1px,transparent 1px);
+  background-size:40px 40px;
+  pointer-events:none;z-index:0;
+}
+
+/* ── HEADER ── */
+header{
+  position:sticky;top:0;z-index:50;
+  background:rgba(8,12,16,0.95);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(16px);
+}
+.header-inner{
+  max-width:1320px;margin:0 auto;
+  padding:0 2rem;height:58px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.logo{
+  font-family:'Syne',sans-serif;font-weight:800;
+  font-size:1.1rem;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--text);display:flex;align-items:center;gap:0.6rem;
+}
+.logo-mark{
+  width:26px;height:26px;border-radius:6px;
+  background:linear-gradient(135deg,var(--blue),var(--green));
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.65rem;font-weight:700;color:#fff;
+}
+.header-right{
+  display:flex;align-items:center;gap:1.5rem;
+  font-size:0.7rem;color:var(--muted);letter-spacing:0.05em;
+}
+.live-dot{display:flex;align-items:center;gap:0.4rem;color:var(--green);}
+.live-dot::before{
+  content:'';width:6px;height:6px;border-radius:50%;
+  background:var(--green);box-shadow:0 0 8px var(--green);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.35}}
+
+/* ── LAYOUT ── */
+.page{max-width:1320px;margin:0 auto;padding:2rem 2rem 4rem;position:relative;z-index:1;}
+
+/* ── HERO BANNER ── */
+.hero-banner{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:2rem 2.5rem;
+  margin-bottom:1.75rem;
+  display:flex;align-items:center;gap:2rem;
+  position:relative;overflow:hidden;
+}
+.hero-banner::before{
+  content:'';position:absolute;top:-60px;right:-60px;
+  width:220px;height:220px;
+  background:radial-gradient(circle,rgba(74,158,255,0.08) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero-avatar{
+  width:72px;height:72px;border-radius:16px;
+  background:linear-gradient(135deg,#4a9eff,#2256cc);
+  font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  box-shadow:0 0 30px rgba(74,158,255,0.25);
+}
+.hero-info{flex:1;}
+.hero-name{
+  font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;
+  letter-spacing:-0.01em;margin-bottom:0.3rem;
+}
+.hero-meta{
+  display:flex;gap:1rem;flex-wrap:wrap;
+  font-size:0.68rem;color:var(--muted);letter-spacing:0.04em;
+}
+.hero-meta span{display:flex;align-items:center;gap:0.35rem;}
+.hero-tags{display:flex;gap:0.4rem;margin-top:0.6rem;flex-wrap:wrap;}
+.tag{
+  font-size:0.58rem;letter-spacing:0.08em;text-transform:uppercase;
+  font-weight:500;padding:0.18rem 0.55rem;border-radius:4px;
+  border:1px solid var(--border2);color:var(--dim);
+}
+.tag.premium{border-color:#4a9eff44;color:var(--blue);}
+.tag.advisor{border-color:#f5c84244;color:var(--gold);}
+.hero-stats{
+  display:flex;gap:2rem;flex-shrink:0;
+}
+.hero-stat{text-align:right;}
+.hero-stat-label{font-size:0.6rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.3rem;}
+.hero-stat-value{font-family:'Syne',sans-serif;font-weight:700;font-size:1.3rem;}
+.hero-stat-sub{font-size:0.65rem;margin-top:0.2rem;}
+.pos{color:var(--green)}.neg{color:var(--red)}
+
+/* ── MAIN GRID ── */
+.main-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  grid-template-rows:auto;
+  gap:1.5rem;
+}
+
+/* ── SECTION CARD ── */
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+}
+.card-header{
+  padding:1rem 1.4rem 0.8rem;
+  border-bottom:1px solid var(--border);
+  background:var(--surface2);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.card-title{
+  font-family:'Syne',sans-serif;font-size:0.68rem;font-weight:700;
+  letter-spacing:0.14em;text-transform:uppercase;color:var(--dim);
+  display:flex;align-items:center;gap:0.5rem;
+}
+.card-title svg{opacity:0.6;}
+.card-badge{
+  font-size:0.6rem;letter-spacing:0.06em;padding:0.18rem 0.55rem;
+  border-radius:10px;font-weight:500;
+}
+.card-body{padding:1.2rem 1.4rem;}
+
+/* span helpers */
+.span-2{grid-column:span 2;}
+.span-3{grid-column:span 3;}
+.span-1{grid-column:span 1;}
+
+/* ── CREDIT SCORE ── */
+.credit-hero{
+  display:flex;align-items:center;gap:1.5rem;margin-bottom:1rem;
+}
+.credit-ring-wrap{position:relative;flex-shrink:0;}
+.credit-ring-wrap svg{transform:rotate(-90deg);}
+.credit-ring-label{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;
+}
+.ring-score{font-size:1.3rem;font-weight:800;color:var(--text);}
+.ring-label{font-size:0.55rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-top:1px;}
+.credit-details{flex:1;}
+.credit-detail-row{display:flex;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid var(--border);}
+.credit-detail-row:last-child{border-bottom:none;}
+.cdl{font-size:0.68rem;color:var(--muted);}
+.cdv{font-size:0.68rem;font-weight:500;}
+.credit-bar-section{margin-top:0.75rem;}
+.cbs-label{font-size:0.6rem;color:var(--muted);margin-bottom:0.4rem;letter-spacing:0.06em;}
+.cbs-track{height:5px;border-radius:3px;background:var(--border);overflow:hidden;}
+.cbs-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#f04a5e,#f5c842,#22d47c);}
+.cbs-markers{display:flex;justify-content:space-between;font-size:0.55rem;color:var(--muted);margin-top:3px;}
+
+/* ── INCOME ── */
+.income-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem;}
+.income-box{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:10px;padding:0.85rem 1rem;
+}
+.income-box-label{font-size:0.58rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.3rem;}
+.income-box-value{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;}
+.income-box-sub{font-size:0.62rem;margin-top:0.2rem;}
+.income-breakdown{margin-top:0.5rem;}
+.ib-row{display:flex;align-items:center;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid var(--border);}
+.ib-row:last-child{border-bottom:none;}
+.ib-label{font-size:0.68rem;color:var(--dim);}
+.ib-val{font-size:0.68rem;font-weight:500;}
+
+/* ── EXPENSES ── */
+.expense-item{
+  display:flex;align-items:center;gap:0.8rem;padding:0.5rem 0;
+  border-bottom:1px solid var(--border);
+}
+.expense-item:last-child{border-bottom:none;}
+.expense-icon{
+  width:28px;height:28px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.75rem;flex-shrink:0;
+}
+.expense-label{flex:1;font-size:0.72rem;}
+.expense-sub{font-size:0.6rem;color:var(--muted);margin-top:1px;}
+.expense-amt{font-size:0.78rem;font-weight:500;text-align:right;}
+.expense-bar-wrap{margin-top:1rem;padding-top:0.75rem;border-top:1px solid var(--border);}
+.expense-bar-label{font-size:0.6rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.6rem;}
+.ebar{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.35rem;}
+.ebar-cat{font-size:0.6rem;color:var(--muted);width:80px;flex-shrink:0;}
+.ebar-track{flex:1;height:5px;border-radius:3px;background:var(--border);overflow:hidden;}
+.ebar-fill{height:100%;border-radius:3px;}
+.ebar-val{font-size:0.6rem;color:var(--dim);width:42px;text-align:right;flex-shrink:0;}
+
+/* ── BANK ACCOUNTS ── */
+.account-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0.6rem 0;border-bottom:1px solid var(--border);
+}
+.account-row:last-child{border-bottom:none;}
+.al{display:flex;align-items:center;gap:0.75rem;}
+.ai{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.75rem;flex-shrink:0;}
+.an{font-size:0.76rem;font-weight:500;}
+.anum{font-size:0.62rem;color:var(--muted);margin-top:1px;}
+.ar{text-align:right;}
+.ab{font-family:'Syne',sans-serif;font-weight:600;font-size:0.9rem;}
+.ach{font-size:0.62rem;margin-top:1px;}
+.aapy{font-size:0.6rem;color:var(--muted);margin-top:1px;}
+
+/* ── STOCKS ── */
+.stock-row{display:flex;align-items:center;padding:0.5rem 0;gap:0.6rem;border-bottom:1px solid var(--border);}
+.stock-row:last-child{border-bottom:none;}
+.ticker{font-family:'Syne',sans-serif;font-weight:700;font-size:0.75rem;width:44px;flex-shrink:0;color:var(--blue);}
+.smid{flex:1;}
+.sshares{font-size:0.64rem;color:var(--muted);}
+.sco{font-size:0.6rem;color:var(--muted);margin-top:1px;opacity:0.65;}
+.spark{width:52px;height:20px;flex-shrink:0;}
+.sright{text-align:right;min-width:66px;}
+.schg{font-size:0.76rem;font-weight:500;}
+.sval{font-size:0.62rem;color:var(--dim);margin-top:1px;}
+.sprice{font-size:0.58rem;color:var(--muted);margin-top:1px;}
+
+/* ── CREDIT CARDS ── */
+.cc-card{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:14px;padding:1rem 1.2rem;margin-bottom:0.9rem;
+  position:relative;overflow:hidden;
+}
+.cc-card:last-child{margin-bottom:0;}
+.cc-card::after{
+  content:'';position:absolute;right:-20px;top:-20px;
+  width:80px;height:80px;border-radius:50%;
+  opacity:0.06;
+}
+.cc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:0.8rem;}
+.cc-name{font-family:'Syne',sans-serif;font-weight:700;font-size:0.85rem;margin-bottom:0.15rem;}
+.cc-num{font-size:0.62rem;color:var(--muted);letter-spacing:0.1em;}
+.cc-network{font-size:0.6rem;padding:0.15rem 0.5rem;border-radius:4px;font-weight:600;letter-spacing:0.06em;}
+.cc-utilization{margin-bottom:0.7rem;}
+.cc-util-label{display:flex;justify-content:space-between;font-size:0.62rem;margin-bottom:0.35rem;}
+.cc-util-left{color:var(--muted);}
+.cc-util-track{height:5px;border-radius:3px;background:var(--border);overflow:hidden;}
+.cc-util-fill{height:100%;border-radius:3px;}
+.cc-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.5rem;}
+.cc-stat{background:var(--surface3);border-radius:7px;padding:0.45rem 0.55rem;}
+.cc-stat-label{font-size:0.56rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.2rem;}
+.cc-stat-val{font-size:0.78rem;font-weight:500;}
+.billing-header{
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:0.62rem;color:var(--muted);margin-bottom:0.6rem;
+  padding-bottom:0.5rem;border-bottom:1px solid var(--border);
+}
+.billing-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0.38rem 0;border-bottom:1px solid var(--border);
+}
+.billing-row:last-child{border-bottom:none;}
+.br-desc{font-size:0.7rem;}
+.br-date{font-size:0.6rem;color:var(--muted);margin-top:1px;}
+.br-amt{font-size:0.72rem;font-weight:500;}
+
+/* ── TRAVEL POINTS ── */
+.travel-hero{
+  display:flex;gap:1rem;margin-bottom:1rem;
+}
+.travel-box{
+  flex:1;background:var(--surface2);border:1px solid var(--border);
+  border-radius:12px;padding:0.85rem 1rem;text-align:center;
+}
+.travel-box-icon{font-size:1.2rem;margin-bottom:0.35rem;}
+.travel-box-label{font-size:0.56rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.25rem;}
+.travel-box-val{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;}
+.travel-box-sub{font-size:0.6rem;margin-top:0.15rem;}
+.travel-programs{margin-top:0.5rem;}
+.tp-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0.55rem 0;border-bottom:1px solid var(--border);
+}
+.tp-row:last-child{border-bottom:none;}
+.tp-left{display:flex;align-items:center;gap:0.7rem;}
+.tp-icon{
+  width:30px;height:30px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;font-size:0.8rem;flex-shrink:0;
+}
+.tp-program{font-size:0.74rem;font-weight:500;}
+.tp-tier{font-size:0.6rem;margin-top:1px;}
+.tp-right{text-align:right;}
+.tp-pts{font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;}
+.tp-val{font-size:0.6rem;color:var(--muted);margin-top:1px;}
+.tp-exp{font-size:0.58rem;margin-top:1px;}
+.upcoming-trips{margin-top:1rem;padding-top:0.75rem;border-top:1px solid var(--border);}
+.ut-label{font-size:0.6rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.6rem;}
+.ut-row{
+  display:flex;align-items:center;gap:0.7rem;
+  padding:0.45rem 0;border-bottom:1px solid var(--border);
+}
+.ut-row:last-child{border-bottom:none;}
+.ut-flag{font-size:1rem;flex-shrink:0;}
+.ut-dest{font-size:0.72rem;font-weight:500;}
+.ut-date{font-size:0.6rem;color:var(--muted);margin-top:1px;}
+.ut-pts{font-size:0.68rem;text-align:right;flex:1;}
+.ut-airline{font-size:0.58rem;color:var(--muted);margin-top:1px;text-align:right;}
+
+/* ── DEBTS ── */
+.debt-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0.5rem 0;border-bottom:1px solid var(--border);
+}
+.debt-row:last-child{border-bottom:none;}
+.dn{font-size:0.74rem;}
+.dsub{font-size:0.6rem;color:var(--muted);margin-top:1px;}
+.dr{text-align:right;}
+.dbal{font-size:0.84rem;font-weight:500;color:var(--red);}
+.drate{font-size:0.6rem;color:var(--muted);margin-top:1px;}
+
+/* ── TRANSACTIONS ── */
+.txn-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0.44rem 0;border-bottom:1px solid var(--border);
+}
+.txn-row:last-child{border-bottom:none;}
+.txn-desc{font-size:0.72rem;}
+.txn-date{font-size:0.6rem;color:var(--muted);margin-top:1px;}
+.txn-amt{font-size:0.78rem;font-weight:500;}
+
+/* ── FOOTER ── */
+footer{
+  border-top:1px solid var(--border);
+  padding:1.25rem 2rem;text-align:center;
+  font-size:0.64rem;color:var(--muted);letter-spacing:0.06em;
+  position:relative;z-index:1;
+}
+
+@media(max-width:900px){
+  .main-grid{grid-template-columns:1fr 1fr;}
+  .span-3{grid-column:span 2;}
+}
+@media(max-width:600px){
+  .main-grid{grid-template-columns:1fr;}
+  .span-2,.span-3{grid-column:span 1;}
+  .hero-stats{display:none;}
+  .hero-name{font-size:1.2rem;}
+  .income-grid{grid-template-columns:1fr;}
+  .travel-hero{flex-wrap:wrap;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo"><div class="logo-mark">V</div>VAULT</div>
+    <div class="header-right">
+      <span class="live-dot">LIVE</span>
+      <span>FEB 26, 2026 &nbsp;·&nbsp; NYSE OPEN</span>
+    </div>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- ══ HERO ══ -->
+  <div class="hero-banner">
+    <div class="hero-avatar">MH</div>
+    <div class="hero-info">
+      <div class="hero-name">Marcus T. Holloway</div>
+      <div class="hero-meta">
+        <span>📍 Austin, TX</span>
+        <span>💼 Software Engineer</span>
+        <span>🗓 Member since Jan 2019</span>
+        <span>ID: CLT-00412</span>
+      </div>
+      <div class="hero-tags">
+        <span class="tag premium">PREMIUM</span>
+        <span class="tag advisor">ADVISOR MANAGED</span>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-label">Net Worth</div>
+        <div class="hero-stat-value" style="color:var(--gold)">$284,510</div>
+        <div class="hero-stat-sub pos">+$14,220 YTD</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-label">Credit Score</div>
+        <div class="hero-stat-value" style="color:#a8e063">762</div>
+        <div class="hero-stat-sub" style="color:var(--muted)">Excellent</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-label">Total Points</div>
+        <div class="hero-stat-value" style="color:var(--purple)">248,400</div>
+        <div class="hero-stat-sub" style="color:var(--muted)">≈ $2,980 value</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MAIN GRID ══ -->
+  <div class="main-grid">
+
+    <!-- ── CREDIT SCORE ── -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Credit Score
+        </div>
+        <span class="card-badge" style="background:#1a2e1a;color:var(--green)">EXCELLENT</span>
+      </div>
+      <div class="card-body">
+        <div class="credit-hero">
+          <div class="credit-ring-wrap">
+            <svg width="100" height="100" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="42" fill="none" stroke="#1e2a3a" stroke-width="8"/>
+              <circle cx="50" cy="50" r="42" fill="none" stroke="#a8e063" stroke-width="8"
+                stroke-dasharray="263.9" stroke-dashoffset="64" stroke-linecap="round"/>
+            </svg>
+            <div class="credit-ring-label">
+              <span class="ring-score">762</span>
+              <span class="ring-label">FICO 8</span>
+            </div>
+          </div>
+          <div class="credit-details">
+            <div class="credit-detail-row"><span class="cdl">Payment History</span><span class="cdv pos">Excellent</span></div>
+            <div class="credit-detail-row"><span class="cdl">Utilization</span><span class="cdv pos">18%</span></div>
+            <div class="credit-detail-row"><span class="cdl">Avg Account Age</span><span class="cdv">7.4 yrs</span></div>
+            <div class="credit-detail-row"><span class="cdl">Hard Inquiries</span><span class="cdv">1 (12 mo)</span></div>
+            <div class="credit-detail-row"><span class="cdl">Derogatory Marks</span><span class="cdv pos">None</span></div>
+          </div>
+        </div>
+        <div class="credit-bar-section">
+          <div class="cbs-label">Score Range: 300–850</div>
+          <div class="cbs-track"><div class="cbs-fill" style="width:82%"></div></div>
+          <div class="cbs-markers"><span>300</span><span>Poor</span><span>Fair</span><span>Good</span><span>Excellent</span><span>850</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── INCOME ── -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Income
+        </div>
+        <span class="card-badge" style="background:#1a2e1a;color:var(--green)">W2 + FREELANCE</span>
+      </div>
+      <div class="card-body">
+        <div class="income-grid">
+          <div class="income-box">
+            <div class="income-box-label">Monthly</div>
+            <div class="income-box-value" style="color:var(--green)">$15,416</div>
+            <div class="income-box-sub pos">+$820 vs last mo</div>
+          </div>
+          <div class="income-box">
+            <div class="income-box-label">Annual</div>
+            <div class="income-box-value" style="color:var(--green)">$185,000</div>
+            <div class="income-box-sub pos">+6.2% YoY</div>
+          </div>
+        </div>
+        <div class="income-breakdown">
+          <div class="ib-row"><span class="ib-label">Base Salary (gross)</span><span class="ib-val">$155,000 / yr</span></div>
+          <div class="ib-row"><span class="ib-label">Annual Bonus</span><span class="ib-val">$18,000 / yr</span></div>
+          <div class="ib-row"><span class="ib-label">Freelance / Side Work</span><span class="ib-val">$12,000 / yr</span></div>
+          <div class="ib-row"><span class="ib-label">Dividend Income</span><span class="ib-val">$2,840 / yr</span></div>
+          <div class="ib-row"><span class="ib-label">Est. Federal Tax</span><span class="ib-val neg">-$38,400 / yr</span></div>
+          <div class="ib-row"><span class="ib-label">Est. Take-Home</span><span class="ib-val pos">$146,600 / yr</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MONTHLY EXPENSES ── -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          Monthly Expenses
+        </div>
+        <span class="card-badge" style="background:#2a1a10;color:var(--orange)">$5,820 / MO</span>
+      </div>
+      <div class="card-body">
+        <div class="expense-item">
+          <div class="expense-icon" style="background:#1a2030;color:#4a9eff">🏠</div>
+          <div><div class="expense-label">Mortgage</div><div class="expense-sub">2412 Elm St. · fixed</div></div>
+          <div class="expense-amt neg">$1,680</div>
+        </div>
+        <div class="expense-item">
+          <div class="expense-icon" style="background:#1a2030;color:#4a9eff">🚗</div>
+          <div><div class="expense-label">Auto Loan</div><div class="expense-sub">2022 Toyota Tacoma</div></div>
+          <div class="expense-amt neg">$480</div>
+        </div>
+        <div class="expense-item">
+          <div class="expense-icon" style="background:#0d3a2a;color:#22d47c">🛒</div>
+          <div><div class="expense-label">Groceries</div><div class="expense-sub">Whole Foods + HEB</div></div>
+          <div class="expense-amt neg">$620</div>
+        </div>
+        <div class="expense-item">
+          <div class="expense-icon" style="background:#3d300a;color:#f5c842">🍽</div>
+          <div><div class="expense-label">Dining Out</div><div class="expense-sub">Restaurants + delivery</div></div>
+          <div class="expense-amt neg">$380</div>
+        </div>
+        <div class="expense-item">
+          <div class="expense-icon" style="background:#2a0d3a;color:#c47eff">📱</div>
+          <div><div class="expense-label">Subscriptions</div><div class="expense-sub">Netflix, Spotify, Adobe, iCloud</div></div>
+          <div class="expense-amt neg">$148</div>
+        </div>
+        <div class="expense-item">
+          <div class="expense-icon" style="background:#1a2a0d;color:#88dd44">⚡</div>
+          <div><div class="expense-label">Utilities</div><div class="expense-sub">Electric, water, internet</div></div>
+          <div class="expense-amt neg">$310</div>
+        </div>
+        <div class="expense-item">
+          <div class="expense-icon" style="background:#2a1a10;color:#ff8c42">✈️</div>
+          <div><div class="expense-label">Travel / Leisure</div><div class="expense-sub">Avg. monthly allocation</div></div>
+          <div class="expense-amt neg">$420</div>
+        </div>
+        <div class="expense-item">
+          <div class="expense-icon" style="background:#0d2a4a;color:#4a9eff">💰</div>
+          <div><div class="expense-label">Savings / Investments</div><div class="expense-sub">Auto-transfers</div></div>
+          <div class="expense-amt pos">$1,782</div>
+        </div>
+        <div class="expense-bar-wrap">
+          <div class="expense-bar-label">Spending Breakdown</div>
+          <div class="ebar"><div class="ebar-cat">Housing</div><div class="ebar-track"><div class="ebar-fill" style="width:72%;background:#4a9eff"></div></div><div class="ebar-val">$1,680</div></div>
+          <div class="ebar"><div class="ebar-cat">Transport</div><div class="ebar-track"><div class="ebar-fill" style="width:30%;background:#22d47c"></div></div><div class="ebar-val">$480</div></div>
+          <div class="ebar"><div class="ebar-cat">Food</div><div class="ebar-track"><div class="ebar-fill" style="width:42%;background:#f5c842"></div></div><div class="ebar-val">$1,000</div></div>
+          <div class="ebar"><div class="ebar-cat">Subs</div><div class="ebar-track"><div class="ebar-fill" style="width:10%;background:#c47eff"></div></div><div class="ebar-val">$148</div></div>
+          <div class="ebar"><div class="ebar-cat">Utilities</div><div class="ebar-track"><div class="ebar-fill" style="width:19%;background:#88dd44"></div></div><div class="ebar-val">$310</div></div>
+          <div class="ebar"><div class="ebar-cat">Travel</div><div class="ebar-track"><div class="ebar-fill" style="width:25%;background:#ff8c42"></div></div><div class="ebar-val">$420</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── BANK ACCOUNTS ── -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          Bank Accounts
+        </div>
+        <span class="card-badge" style="background:#0d2a4a;color:var(--blue)">3 ACCOUNTS</span>
+      </div>
+      <div class="card-body">
+        <div class="account-row">
+          <div class="al"><div class="ai" style="background:#0d2a4a;color:#4a9eff">⬡</div><div><div class="an">Premier Checking</div><div class="anum">••••  3821 · Chase</div></div></div>
+          <div class="ar"><div class="ab">$12,450.88</div><div class="ach pos">+$240 this month</div></div>
+        </div>
+        <div class="account-row">
+          <div class="al"><div class="ai" style="background:#0d3a2a;color:#22d47c">◈</div><div><div class="an">High-Yield Savings</div><div class="anum">••••  7703 · Marcus</div></div></div>
+          <div class="ar"><div class="ab">$58,200.00</div><div class="ach pos">+$1,800 this month</div><div class="aapy">APY 2.8%</div></div>
+        </div>
+        <div class="account-row">
+          <div class="al"><div class="ai" style="background:#3d300a;color:#f5c842">◈</div><div><div class="an">Roth IRA</div><div class="anum">••••  4490 · Fidelity</div></div></div>
+          <div class="ar"><div class="ab">$31,400.00</div><div class="ach pos">+$3,100 YTD</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CREDIT CARDS ── -->
+    <div class="card span-2">
+      <div class="card-header">
+        <div class="card-title">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          Credit Cards & Billing
+        </div>
+        <span class="card-badge" style="background:#1a2e1a;color:var(--green)">18% UTILIZATION</span>
+      </div>
+      <div class="card-body" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <!-- Card 1 -->
+        <div>
+          <div class="cc-card" style="border-color:#4a9eff33;background:linear-gradient(135deg,#0e1a2e,#0a1420)">
+            <div class="cc-top">
+              <div>
+                <div class="cc-name">Chase Sapphire Reserve</div>
+                <div class="cc-num">••••  ••••  ••••  4421</div>
+              </div>
+              <span class="cc-network" style="background:#1a2030;color:#4a9eff">VISA</span>
+            </div>
+            <div class="cc-utilization">
+              <div class="cc-util-label">
+                <span class="cc-util-left">Balance: $4,820 / $30,000 limit</span>
+                <span style="color:var(--green)">16%</span>
+              </div>
+              <div class="cc-util-track"><div class="cc-util-fill" style="width:16%;background:var(--green)"></div></div>
+            </div>
+            <div class="cc-stats">
+              <div class="cc-stat"><div class="cc-stat-label">Min. Due</div><div class="cc-stat-val">$96</div></div>
+              <div class="cc-stat"><div class="cc-stat-label">Due Date</div><div class="cc-stat-val">Mar 8</div></div>
+              <div class="cc-stat"><div class="cc-stat-label">APR</div><div class="cc-stat-val neg">22.9%</div></div>
+            </div>
+          </div>
+          <div class="billing-header"><span>Recent Transactions – CSR</span><span>This Cycle</span></div>
+          <div class="billing-row"><div><div class="br-desc">Delta Airlines – DFW→JFK</div><div class="br-date">Feb 18 · Travel</div></div><div class="br-amt neg">-$342</div></div>
+          <div class="billing-row"><div><div class="br-desc">Whole Foods #1142</div><div class="br-date">Feb 20 · Groceries</div></div><div class="br-amt neg">-$148</div></div>
+          <div class="billing-row"><div><div class="br-desc">Uchi Austin – Restaurant</div><div class="br-date">Feb 21 · Dining</div></div><div class="br-amt neg">-$210</div></div>
+          <div class="billing-row"><div><div class="br-desc">Shell Gas Station</div><div class="br-date">Feb 23 · Auto</div></div><div class="br-amt neg">-$78</div></div>
+        </div>
+        <!-- Card 2 -->
+        <div>
+          <div class="cc-card" style="border-color:#f5c84233;background:linear-gradient(135deg,#1a1400,#0f0e0a)">
+            <div class="cc-top">
+              <div>
+                <div class="cc-name">Amex Gold Card</div>
+                <div class="cc-num">••••  ••••  ••••  8803</div>
+              </div>
+              <span class="cc-network" style="background:#2a1f00;color:#f5c842">AMEX</span>
+            </div>
+            <div class="cc-utilization">
+              <div class="cc-util-label">
+                <span class="cc-util-left">Balance: $1,940 / $20,000 limit</span>
+                <span style="color:var(--green)">9.7%</span>
+              </div>
+              <div class="cc-util-track"><div class="cc-util-fill" style="width:9.7%;background:var(--green)"></div></div>
+            </div>
+            <div class="cc-stats">
+              <div class="cc-stat"><div class="cc-stat-label">Min. Due</div><div class="cc-stat-val">$39</div></div>
+              <div class="cc-stat"><div class="cc-stat-label">Due Date</div><div class="cc-stat-val">Mar 12</div></div>
+              <div class="cc-stat"><div class="cc-stat-label">APR</div><div class="cc-stat-val neg">21.4%</div></div>
+            </div>
+          </div>
+          <div class="billing-header"><span>Recent Transactions – Gold</span><span>This Cycle</span></div>
+          <div class="billing-row"><div><div class="br-desc">Trader Joe's #204</div><div class="br-date">Feb 16 · Groceries</div></div><div class="br-amt neg">-$95</div></div>
+          <div class="billing-row"><div><div class="br-desc">Grubhub – Torchy's Tacos</div><div class="br-date">Feb 19 · Dining</div></div><div class="br-amt neg">-$44</div></div>
+          <div class="billing-row"><div><div class="br-desc">Marriott Bonvoy – Deposit</div><div class="br-date">Feb 22 · Travel</div></div><div class="br-amt neg">-$480</div></div>
+          <div class="billing-row"><div><div class="br-desc">Amazon.com</div><div class="br-date">Feb 24 · Shopping</div></div><div class="br-amt neg">-$127</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TRAVEL POINTS ── -->
+    <div class="card span-2">
+      <div class="card-header">
+        <div class="card-title">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.5 19.79 19.79 0 0 1 1.61 4.9 2 2 0 0 1 3.6 2.7h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 10.4a16 16 0 0 0 6 6l.93-.93a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.5 18z"/></svg>
+          Travel Points & Rewards
+        </div>
+        <span class="card-badge" style="background:#1a0d2a;color:var(--purple)">248,400 PTS TOTAL</span>
+      </div>
+      <div class="card-body">
+        <div class="travel-hero">
+          <div class="travel-box">
+            <div class="travel-box-icon">✈️</div>
+            <div class="travel-box-label">Chase UR</div>
+            <div class="travel-box-val" style="color:var(--blue)">142,800</div>
+            <div class="travel-box-sub" style="color:var(--muted)">≈ $2,142 value</div>
+          </div>
+          <div class="travel-box">
+            <div class="travel-box-icon">⭐</div>
+            <div class="travel-box-label">Amex MR</div>
+            <div class="travel-box-val" style="color:var(--gold)">68,400</div>
+            <div class="travel-box-sub" style="color:var(--muted)">≈ $684 value</div>
+          </div>
+          <div class="travel-box">
+            <div class="travel-box-icon">🛫</div>
+            <div class="travel-box-label">Delta Miles</div>
+            <div class="travel-box-val" style="color:var(--red)">22,200</div>
+            <div class="travel-box-sub" style="color:var(--muted)">≈ $111 value</div>
+          </div>
+          <div class="travel-box">
+            <div class="travel-box-icon">🏨</div>
+            <div class="travel-box-label">Marriott Pts</div>
+            <div class="travel-box-val" style="color:var(--green)">15,000</div>
+            <div class="travel-box-sub" style="color:var(--muted)">≈ $43 value</div>
+          </div>
+        </div>
+        <div class="travel-programs">
+          <div class="tp-row">
+            <div class="tp-left">
+              <div class="tp-icon" style="background:#0d2a4a;color:#4a9eff">✈</div>
+              <div>
+                <div class="tp-program">Chase Ultimate Rewards</div>
+                <div class="tp-tier" style="color:var(--blue)">Sapphire Reserve · 3x Travel</div>
+              </div>
+            </div>
+            <div class="tp-right">
+              <div class="tp-pts" style="color:var(--blue)">142,800 pts</div>
+              <div class="tp-val">≈ $2,142 travel value</div>
+              <div class="tp-exp" style="color:var(--muted)">No expiry</div>
+            </div>
+          </div>
+          <div class="tp-row">
+            <div class="tp-left">
+              <div class="tp-icon" style="background:#3d300a;color:#f5c842">★</div>
+              <div>
+                <div class="tp-program">Amex Membership Rewards</div>
+                <div class="tp-tier" style="color:var(--gold)">Gold Card · 4x Dining/Grocery</div>
+              </div>
+            </div>
+            <div class="tp-right">
+              <div class="tp-pts" style="color:var(--gold)">68,400 pts</div>
+              <div class="tp-val">≈ $684 value</div>
+              <div class="tp-exp" style="color:var(--muted)">No expiry</div>
+            </div>
+          </div>
+          <div class="tp-row">
+            <div class="tp-left">
+              <div class="tp-icon" style="background:#2a0808;color:#e04040">△</div>
+              <div>
+                <div class="tp-program">Delta SkyMiles</div>
+                <div class="tp-tier" style="color:var(--red)">Silver Medallion</div>
+              </div>
+            </div>
+            <div class="tp-right">
+              <div class="tp-pts" style="color:var(--red)">22,200 miles</div>
+              <div class="tp-val">≈ $111 value</div>
+              <div class="tp-exp neg">Exp. Dec 2026</div>
+            </div>
+          </div>
+          <div class="tp-row">
+            <div class="tp-left">
+              <div class="tp-icon" style="background:#0d2a3a;color:#22d4b4">▣</div>
+              <div>
+                <div class="tp-program">Marriott Bonvoy</div>
+                <div class="tp-tier" style="color:#22d4b4">Silver Elite</div>
+              </div>
+            </div>
+            <div class="tp-right">
+              <div class="tp-pts" style="color:#22d4b4">15,000 pts</div>
+              <div class="tp-val">≈ $43 value (~1 night)</div>
+              <div class="tp-exp" style="color:var(--muted)">No expiry</div>
+            </div>
+          </div>
+        </div>
+        <div class="upcoming-trips">
+          <div class="ut-label">Upcoming Redemptions</div>
+          <div class="ut-row">
+            <div class="ut-flag">🇯🇵</div>
+            <div><div class="ut-dest">Tokyo, Japan</div><div class="ut-date">Apr 12–22, 2026</div></div>
+            <div class="ut-pts"><div class="pos">−65,000 UR pts</div><div class="ut-airline">Booked · JAL Business</div></div>
+          </div>
+          <div class="ut-row">
+            <div class="ut-flag">🇲🇽</div>
+            <div><div class="ut-dest">Cancún, Mexico</div><div class="ut-date">Jun 5–10, 2026</div></div>
+            <div class="ut-pts"><div style="color:var(--gold)">−20,000 MR pts</div><div class="ut-airline">Pending · Delta</div></div>
+          </div>
+          <div class="ut-row">
+            <div class="ut-flag">🇮🇹</div>
+            <div><div class="ut-dest">Rome, Italy</div><div class="ut-date">Sep 2026 · Planning</div></div>
+            <div class="ut-pts"><div style="color:var(--muted)">~80,000 pts est.</div><div class="ut-airline">Not booked yet</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── STOCKS ── -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          Stock Portfolio
+        </div>
+        <span class="card-badge" style="background:#1a2e1a;color:var(--green)">$99,449 TOTAL</span>
+      </div>
+      <div class="card-body">
+        <div id="stocks"></div>
+      </div>
+    </div>
+
+    <!-- ── DEBTS ── -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Debts & Loans
+        </div>
+        <span class="card-badge" style="background:#2a0d0d;color:var(--red)">$322,420 TOTAL</span>
+      </div>
+      <div class="card-body">
+        <div class="debt-row"><div><div class="dn">Mortgage – 2412 Elm St.</div><div class="dsub">30-yr fixed · $340k orig. · 2021</div></div><div class="dr"><div class="dbal">$298,400</div><div class="drate">3.25% APR · $1,680/mo</div></div></div>
+        <div class="debt-row"><div><div class="dn">Auto Loan – 2022 Toyota Tacoma</div><div class="dsub">60-mo · $42k orig. · 28 mo left</div></div><div class="dr"><div class="dbal">$18,200</div><div class="drate">4.9% APR · $480/mo</div></div></div>
+        <div class="debt-row"><div><div class="dn">CC Balance – Chase Sapphire</div><div class="dsub">Carrying partial balance</div></div><div class="dr"><div class="dbal">$4,820</div><div class="drate">22.9% APR</div></div></div>
+        <div class="debt-row"><div><div class="dn">CC Balance – Amex Gold</div><div class="dsub">Carrying partial balance</div></div><div class="dr"><div class="dbal">$1,940</div><div class="drate">21.4% APR</div></div></div>
+      </div>
+    </div>
+
+    <!-- ── RECENT TRANSACTIONS ── -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Recent Transactions
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="txn-row"><div><div class="txn-desc">Direct Deposit – Employer</div><div class="txn-date">Feb 15, 2026 · Payroll</div></div><div class="txn-amt pos">+$7,307</div></div>
+        <div class="txn-row"><div><div class="txn-desc">Mortgage Payment</div><div class="txn-date">Feb 01, 2026 · Housing</div></div><div class="txn-amt neg">-$1,680</div></div>
+        <div class="txn-row"><div><div class="txn-desc">Transfer to HY Savings</div><div class="txn-date">Feb 17, 2026 · Savings</div></div><div class="txn-amt neg">-$1,500</div></div>
+        <div class="txn-row"><div><div class="txn-desc">Whole Foods Market</div><div class="txn-date">Feb 18, 2026 · Groceries</div></div><div class="txn-amt neg">-$148</div></div>
+        <div class="txn-row"><div><div class="txn-desc">Vanguard Auto-Invest</div><div class="txn-date">Feb 16, 2026 · Investment</div></div><div class="txn-amt neg">-$500</div></div>
+        <div class="txn-row"><div><div class="txn-desc">Freelance – Client Invoice</div><div class="txn-date">Feb 20, 2026 · Income</div></div><div class="txn-amt pos">+$2,100</div></div>
+        <div class="txn-row"><div><div class="txn-desc">Netflix / Spotify / Adobe</div><div class="txn-date">Feb 22, 2026 · Subscriptions</div></div><div class="txn-amt neg">-$76</div></div>
+        <div class="txn-row"><div><div class="txn-desc">Uchi Restaurant – Austin</div><div class="txn-date">Feb 21, 2026 · Dining</div></div><div class="txn-amt neg">-$210</div></div>
+      </div>
+    </div>
+
+  </div><!-- /main-grid -->
+</div><!-- /page -->
+
+<footer>VAULT DEMO &nbsp;·&nbsp; ALL DATA IS ENTIRELY FICTIONAL &nbsp;·&nbsp; FOR DISPLAY PURPOSES ONLY</footer>
+
+<script>
+const stocks = [
+  {t:"NVDA",co:"NVIDIA Corp.",sh:"42 shares",p:"$875.20",v:"$36,758",c:"+4.2%",pos:true, sp:[60,65,72,68,80,85,90,88,95]},
+  {t:"AAPL",co:"Apple Inc.",sh:"115 shares",p:"$178.50",v:"$20,528",c:"+1.8%",pos:true, sp:[80,75,78,82,79,85,84,87,90]},
+  {t:"TSLA",co:"Tesla Inc.",sh:"30 shares",p:"$192.10",v:"$5,763",c:"-3.1%",pos:false,sp:[90,80,70,75,65,60,68,72,66]},
+  {t:"VOO", co:"Vanguard S&P 500",sh:"80 shares",p:"$455.00",v:"$36,400",c:"+0.9%",pos:true, sp:[50,55,58,60,62,65,64,68,70]},
+];
+
+function sparkPath(d,w,h){
+  const mn=Math.min(...d),mx=Math.max(...d),r=mx-mn||1;
+  return d.map((v,i)=>`${(i/(d.length-1))*w},${h-((v-mn)/r)*h}`).join(' ');
+}
+
+document.getElementById('stocks').innerHTML = stocks.map(s=>{
+  const sc=s.pos?'#22d47c':'#f04a5e';
+  return`<div class="stock-row">
+    <div class="ticker">${s.t}</div>
+    <div class="smid"><div class="sshares">${s.sh}</div><div class="sco">${s.co}</div></div>
+    <svg class="spark" viewBox="0 0 52 20" preserveAspectRatio="none">
+      <polyline points="${sparkPath(s.sp,52,18)}" fill="none" stroke="${sc}" stroke-width="1.5" stroke-linejoin="round"/>
+    </svg>
+    <div class="sright">
+      <div class="schg ${s.pos?'pos':'neg'}">${s.c}</div>
+      <div class="sval">${s.v}</div>
+      <div class="sprice">${s.p}/sh</div>
+    </div>
+  </div>`;
+}).join('');
+</script>
+</body>
+</html>
